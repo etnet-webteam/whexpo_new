@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import '../../assets/styles/2025/form.css';
+import { ApplicationService } from '../../services/applicationService';
+import { type ApplicationFormData } from '../../lib/amplify';
 
 interface FormData {
   // Part I - Entry Information
@@ -77,6 +79,7 @@ const Form2025: React.FC = () => {
 
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Scroll to top functionality
   const scrollToTop = () => {
@@ -183,12 +186,30 @@ const Form2025: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      // TODO: Submit form data to backend
-      console.log('Form submitted:', formData);
-      alert('Application submitted successfully! You will receive a confirmation email shortly.');
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      const result = await ApplicationService.submitApplication(formData as ApplicationFormData);
+      
+      if (result.success) {
+        alert(`Application submitted successfully! Application ID: ${result.applicationId}\nYou will receive a confirmation email shortly.`);
+        // Reset form or redirect to success page
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        alert(`Error submitting application: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Submission error:', error);
+      alert('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -640,7 +661,7 @@ const Form2025: React.FC = () => {
 
               <div className="form-group">
                 <label><strong>3. Please choose either one：請選擇其中一項：*</strong></label>
-                <div className="radio-group">
+                <div className="radio-group single-column">
                   <div className="radio-item">
                     <input
                       type="radio"
@@ -678,7 +699,7 @@ const Form2025: React.FC = () => {
 
               <div className="form-group">
                 <label><strong>4. Please choose either one：請選擇其中一項：*</strong></label>
-                <div className="radio-group">
+                <div className="radio-group single-column">
                   <div className="radio-item">
                     <input
                       type="radio"
@@ -756,8 +777,8 @@ const Form2025: React.FC = () => {
             </p>
 
             <div className="submit-section">
-              <button type="submit" className="submit-btn">
-                Submit 遞交
+              <button type="submit" className="submit-btn" disabled={isSubmitting}>
+                {isSubmitting ? 'Submitting... 提交中...' : 'Submit 遞交'}
               </button>
             </div>
 
