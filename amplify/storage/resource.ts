@@ -2,7 +2,7 @@ import { defineStorage } from '@aws-amplify/backend';
 
 export const storage = defineStorage({
   name: 'whexpo-application-storage',
-  access: (allow) => ({
+  access: (allow: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
     'logos/ai/*': [
       allow.authenticated.to(['read', 'write', 'delete'])
     ],
