@@ -2,13 +2,12 @@ import { defineData } from '@aws-amplify/backend';
 
 const schema = /* GraphQL */ `
   type Application @model
-  @auth(rules: [{ allow: private }]) {
+  @auth(rules: [{ allow: public }]) {
     id: ID!
-    company: String!
-    title: String!
-    category: String!
-    award: String!
-    owner: String
+    applicationData: AWSJSON!
+    createdAt: AWSDateTime!
+    updatedAt: AWSDateTime!
+    updatedBy: String
   }
 `;
 
@@ -16,9 +15,9 @@ const schema = /* GraphQL */ `
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: 'userPool',
-    userPool: {
-      useEnv: 'USERPOOL',
+    defaultAuthorizationMode: 'apiKey',
+    apiKey: {
+      expiresInDays: 365
     }
   }
 });

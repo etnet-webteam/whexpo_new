@@ -23,3 +23,6 @@ See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more inform
 ## License
 
 This library is licensed under the MIT-0 License. See the LICENSE file.
+
+## Amplify_outputs.json
+Amplify 2 > All Apps > whexpo_new [your project name] > Overview > Branches > Choose your branch > Deployments > Deploy backend resources

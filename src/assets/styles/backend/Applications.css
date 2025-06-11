@@ -1,0 +1,127 @@
+.p-6 {
+  padding: 1.5rem;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.overflow-auto {
+  overflow: auto;
+}
+
+.flex {
+  display: flex;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.bg-green-500 {
+  background-color: rgb(34 197 94);
+}
+
+.text-white {
+  color: rgb(255 255 255);
+}
+
+.rounded {
+  border-radius: 0.25rem;
+}
+
+.hover\:bg-green-600:hover {
+  background-color: rgb(22 163 74);
+}
+
+.min-w-full {
+  min-width: 100%;
+}
+
+.bg-white {
+  background-color: rgb(255 255 255);
+}
+
+.shadow {
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.bg-gray-100 {
+  background-color: rgb(243 244 246);
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.border-t {
+  border-top-width: 1px;
+}
+
+.text-red-600 {
+  color: rgb(220 38 38);
+}
+
+.whitespace-pre-wrap {
+  white-space: pre-wrap;
+}
+
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.bg-gray-100 {
+  background-color: rgb(243 244 246);
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.mt-8 {
+  margin-top: 2rem;
+}
+
+.bg-blue-500 {
+  background-color: rgb(59 130 246);
+}
+
+.hover\:bg-blue-600:hover {
+  background-color: rgb(37 99 235);
+} 

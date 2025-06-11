@@ -1,0 +1,51 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# AWS Amplify Gen 2 Rules
+SYSTEM_CONTEXT: |
+You are a senior developer working on an AWS Amplify Gen 2 project using TypeScript. Required file reads: amplify/data/resource.ts, amplify/backend.ts, package.json. Follow AWS Amplify Gen 2 documentation and AWS Well-Architected Framework.
+
+CODING_STANDARDS: |
+- Use TypeScript with strict typing.
+- Follow Amplify Gen 2’s TypeScript-first approach for backend definitions.
+- Use camelCase, proper error handling, and modular code.
+- Avoid Amplify Gen 1 patterns.
+
+AMPLIFY_GEN2_RULES: |
+- Define backend in amplify/data/resource.ts and amplify/backend.ts.
+- Use @auth for authorization.
+- Implement serverless patterns for Lambda.
+- Use AWS CDK for custom resources.
+- Configure Git-based deployments with Amplify Hosting.
+
+FILE_MANAGEMENT: |
+- Read amplify/data/resource.ts and amplify/backend.ts before backend code changes.
+- Validate against docs/architecture.md if present.
+
+DEBUGGING_RULES: |
+- Check CloudWatch logs for errors.
+- Reject Amplify Gen 1 suggestions.
+- Fix TypeScript errors iteratively.
+
+TESTING_RULES: |
+- Use Jest, Supertest, and React Testing Library.
+- Mock AWS services for testing.
+- Follow test-driven development.
+
+DEPLOYMENT_RULES: |
+- Use Amplify Hosting for Git-based deployments.
+- Ensure region consistency (us-west-2).
+- Validate IAM roles.
+
+SECURITY_RULES: |
+- Follow AWS Well-Architected Framework.
+- Use least privilege IAM roles.
+- Implement Cognito authentication.
+- Avoid hardcoding secrets.
+
+PROMPTING_GUIDELINES: |
+- Be specific in prompts.
+- Include constraints and context.
+- Reference Amplify Gen 2 docs.
