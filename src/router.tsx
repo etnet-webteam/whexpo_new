@@ -10,6 +10,7 @@ import Judges2025 from './pages/2025/Judges';
 import Highlights2025 from './pages/2025/Highlights';
 import Column2025 from './pages/2025/Column';
 import Events2025 from './pages/2025/Events';
+import SampleSubmissions from './pages/test/SampleSubmissions';
 
 export const router = createBrowserRouter([
   {
@@ -34,6 +35,11 @@ export const router = createBrowserRouter([
       {
         path: '2025/form',
         element: <Form2025 />,
+      },
+      // Test route for sample submissions
+      {
+        path: 'test/samples',
+        element: <SampleSubmissions />,
       },
       {
         path: '2025',
