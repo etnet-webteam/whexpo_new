@@ -122,10 +122,97 @@ const Form2025: React.FC = () => {
   };
 
   const handleFileChange = (field: keyof FormData, file: File | null) => {
-    setFormData(prev => ({ ...prev, [field]: file }));
+    // Clear existing errors
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
+
+    // File size validation (5MB for brandGuideline and supportingDocument)
+    if (file && (field === 'brandGuideline' || field === 'supportingDocument')) {
+      const maxFileSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxFileSize) {
+        setErrors(prev => ({ 
+          ...prev, 
+          [field]: `File size (${(file.size / 1024 / 1024).toFixed(1)}MB) exceeds 5MB limit` 
+        }));
+        return; // Don't set the file if it's too large
+      }
+    }
+
+    setFormData(prev => ({ ...prev, [field]: file }));
+  };
+
+  const renderFileInfo = (file: File | null) => {
+    if (!file) return null;
+    
+    const sizeInMB = (file.size / 1024 / 1024).toFixed(1);
+    return (
+      <div className="file-info">
+        <span className="file-name">📎 {file.name}</span>
+        <span className="file-size">({sizeInMB}MB)</span>
+      </div>
+    );
+  };
+
+  const populateSampleData = () => {
+    // Create mock files for testing
+    const createMockFile = (fileName: string, content: string, type: string = 'text/plain'): File => {
+      const blob = new Blob([content], { type });
+      return new File([blob], fileName, { type });
+    };
+
+    const sampleData: FormData = {
+      // Part I - Entry Information
+      companyNameEng: 'HealthTech Innovations Limited',
+      companyNameChi: '健康科技創新有限公司',
+      entryTitleEng: 'AI-Powered Health Monitoring System',
+      entryTitleChi: 'AI智能健康監測系統',
+      logoAI: createMockFile('company-logo.ai', 'Mock AI logo file for HealthTech Innovations', 'application/illustrator'),
+      logoJPEG: createMockFile('company-logo.jpg', 'Mock JPEG logo file for HealthTech Innovations', 'image/jpeg'),
+      brandGuideline: createMockFile('brand-guidelines.pdf', 'Mock brand guideline PDF for HealthTech Innovations\n\nBrand Guidelines:\n- Primary Color: #007bff\n- Secondary Color: #28a745\n- Typography: Arial, Helvetica\n- Logo Usage: Minimum size 50px height', 'application/pdf'),
+      companyDescription: '健康科技創新有限公司專注於開發先進的AI智能健康監測系統，致力於為社區提供更優質的醫療保健服務。我們的創新技術結合人工智能和大數據分析，為用戶提供個性化的健康建議和預防性護理方案。公司成立於2020年，已為超過10萬名用戶提供服務，並與多家醫療機構建立合作關係。我們相信透過科技創新，能夠讓每個人都能享受到更好的健康管理體驗，共同建設更健康的社區。',
+      businessRegNo: '12345678-000-01-23-4',
+      incorporationNo: 'CI-2020-0001234',
+      incorporationDate: '2020-03-15',
+      companyAddress: '香港中環國際金融中心二期88樓8801室',
+      
+      // Part II - Contact Details
+      primaryContactName: '李健康',
+      primaryContactTitle: '行政總裁',
+      primaryContactPhone: '23456789',
+      primaryContactEmail: 'ceo@healthtech-innovations.hk',
+      secondaryContactName: '陳醫生',
+      secondaryContactTitle: '醫療總監',
+      secondaryContactPhone: '23456790',
+      secondaryContactEmail: 'medical@healthtech-innovations.hk',
+      
+      // Part III - Award Categories
+      awardCategory: 'health-innovation',
+      
+      // Part IV - Judging Materials
+      supportingDocument: createMockFile('supporting-document.pdf', 'Supporting Document for AI-Powered Health Monitoring System\n\nProject Overview:\nOur AI-powered health monitoring system revolutionizes preventive healthcare by providing real-time health tracking and personalized recommendations.\n\nKey Features:\n- 24/7 health monitoring\n- AI-driven health predictions\n- Personalized health recommendations\n- Integration with healthcare providers\n\nImpact:\n- Served 100,000+ users\n- Reduced hospital visits by 30%\n- Improved early disease detection by 45%\n\nFuture Plans:\n- Expand to 500,000 users by 2025\n- Partner with 50+ healthcare institutions\n- Develop specialized modules for elderly care', 'application/pdf'),
+      videoLink: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      
+      // Declaration
+      submissionUsage: true,
+      applicationDeclaration: true,
+      patentStatus: 'no-patent',
+      intellectualProperty: 'no-dispute',
+      eventAdminCost: true,
+      verifyCode: '6J149'
+    };
+
+    // Update form data
+    setFormData(sampleData);
+    
+    // Clear any existing errors
+    setErrors({});
+    
+    // Show confirmation
+    alert('📝 Sample data populated successfully!\n\nUAT測試數據已成功填入表格，您可以直接提交或修改數據進行測試。');
+    
+    // Scroll to top to see the populated data
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const validateForm = (): boolean => {
@@ -158,6 +245,17 @@ const Form2025: React.FC = () => {
     if (!formData.intellectualProperty) newErrors.intellectualProperty = 'Intellectual property declaration is required';
     if (!formData.eventAdminCost) newErrors.eventAdminCost = 'Event administration cost agreement is required';
     if (!formData.verifyCode) newErrors.verifyCode = 'Verification code is required';
+
+    // File size validation (5MB = 5 * 1024 * 1024 bytes)
+    const maxFileSize = 5 * 1024 * 1024;
+    
+    if (formData.brandGuideline && formData.brandGuideline.size > maxFileSize) {
+      newErrors.brandGuideline = 'Brand guideline file size must not exceed 5MB';
+    }
+    
+    if (formData.supportingDocument && formData.supportingDocument.size > maxFileSize) {
+      newErrors.supportingDocument = 'Supporting document file size must not exceed 5MB';
+    }
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -222,6 +320,16 @@ const Form2025: React.FC = () => {
       
       {/* UAT Badge */}
       <div className="uat-badge">UAT測試</div>
+
+      {/* UAT Sample Data Button */}
+      <button 
+        type="button" 
+        className="uat-sample-btn"
+        onClick={populateSampleData}
+        title="點擊填入測試數據"
+      >
+        📝 填入範例
+      </button>
 
       {/* Cover Section */}
       <div className="form-cover-section">
@@ -333,6 +441,7 @@ const Form2025: React.FC = () => {
                     onChange={(e) => handleFileChange('logoAI', e.target.files?.[0] || null)}
                     required
                   />
+                  {renderFileInfo(formData.logoAI)}
                   {errors.logoAI && <span className="error-message">{errors.logoAI}</span>}
                 </div>
                 
@@ -345,6 +454,7 @@ const Form2025: React.FC = () => {
                     onChange={(e) => handleFileChange('logoJPEG', e.target.files?.[0] || null)}
                     required
                   />
+                  {renderFileInfo(formData.logoJPEG)}
                   {errors.logoJPEG && <span className="error-message">{errors.logoJPEG}</span>}
                 </div>
                 
@@ -358,6 +468,7 @@ const Form2025: React.FC = () => {
                     onChange={(e) => handleFileChange('brandGuideline', e.target.files?.[0] || null)}
                     required
                   />
+                  {renderFileInfo(formData.brandGuideline)}
                   {errors.brandGuideline && <span className="error-message">{errors.brandGuideline}</span>}
                 </div>
               </div>
@@ -610,6 +721,7 @@ const Form2025: React.FC = () => {
                 onChange={(e) => handleFileChange('supportingDocument', e.target.files?.[0] || null)}
                 required
               />
+              {renderFileInfo(formData.supportingDocument)}
               {errors.supportingDocument && <span className="error-message">{errors.supportingDocument}</span>}
             </div>
 

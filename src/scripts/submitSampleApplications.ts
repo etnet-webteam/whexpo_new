@@ -65,8 +65,9 @@ function addMockFiles(applicationData: any, index: number) { // eslint-disable-l
 }
 
 // Main submission function
-export async function submitSampleApplications(skipFiles: boolean = false) {
+export async function submitSampleApplications(skipFiles: boolean = false, useMockUploads: boolean = false) {
   console.log('🚀 Starting submission of 10 sample applications...\n');
+  console.log(`Options: skipFiles=${skipFiles}, useMockUploads=${useMockUploads}\n`);
   
   const results = [];
   
@@ -80,12 +81,17 @@ export async function submitSampleApplications(skipFiles: boolean = false) {
       // Add mock files only if not skipping
       if (!skipFiles) {
         applicationData = addMockFiles(applicationData, i);
+        if (useMockUploads) {
+          console.log(`   📎 Will use mock uploads if real uploads fail`);
+        }
       } else {
         console.log(`   📎 Skipping file uploads for testing`);
       }
       
       // Submit the application
-      const result = await ApplicationService.submitApplication(applicationData);
+      const result = useMockUploads && !skipFiles
+        ? await ApplicationService.submitApplicationWithMockUploads(applicationData)
+        : await ApplicationService.submitApplication(applicationData);
       
       if (result.success) {
         console.log(`✅ Application ${i + 1} submitted successfully!`);

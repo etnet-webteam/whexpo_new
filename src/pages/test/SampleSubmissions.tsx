@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { submitSampleApplications } from '../../scripts/submitSampleApplications';
+import { generateSampleData } from '../../utils/sampleDataGenerator';
+import { ApplicationService } from '../../services/applicationService';
 
 const SampleSubmissions: React.FC = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [results, setResults] = useState<any[]>([]);
   const [logs, setLogs] = useState<string[]>([]);
   const [skipFiles, setSkipFiles] = useState(true); // Default to skip files for easier testing
+  const [useMockUploads, setUseMockUploads] = useState(false);
 
   const addLog = (message: string) => {
     setLogs(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
@@ -29,7 +32,7 @@ const SampleSubmissions: React.FC = () => {
         originalLog(...args);
       };
 
-      const submissionResults = await submitSampleApplications(skipFiles);
+      const submissionResults = await submitSampleApplications(skipFiles, useMockUploads);
       setResults(submissionResults);
       
       // Restore original console.log
@@ -58,7 +61,7 @@ const SampleSubmissions: React.FC = () => {
       
       <div style={{ marginBottom: '20px' }}>
         <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <input
               type="checkbox"
               checked={skipFiles}
@@ -67,26 +70,186 @@ const SampleSubmissions: React.FC = () => {
             />
             Skip file uploads (recommended for testing)
           </label>
+          
+          {!skipFiles && (
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '24px' }}>
+              <input
+                type="checkbox"
+                checked={useMockUploads}
+                onChange={(e) => setUseMockUploads(e.target.checked)}
+                disabled={isRunning}
+              />
+              Use mock uploads if real uploads fail
+            </label>
+          )}
+          
           <small style={{ color: '#666', marginLeft: '24px' }}>
-            {skipFiles ? 'Applications will be submitted without files for faster testing' : 'Applications will include mock file uploads (may require storage permissions)'}
+            {skipFiles 
+              ? 'Applications will be submitted without files for faster testing' 
+              : useMockUploads 
+                ? 'Will try real uploads first, then fallback to mock uploads for testing'
+                : 'Applications will include real file uploads (requires storage permissions)'
+            }
           </small>
         </div>
         
-        <button 
-          onClick={handleRunSubmissions}
-          disabled={isRunning}
-          style={{
-            padding: '12px 24px',
-            fontSize: '16px',
-            backgroundColor: isRunning ? '#ccc' : '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: isRunning ? 'not-allowed' : 'pointer'
-          }}
-        >
-          {isRunning ? '🔄 Running Submissions...' : '🚀 Run Sample Submissions'}
-        </button>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <button 
+            onClick={handleRunSubmissions}
+            disabled={isRunning}
+            style={{
+              padding: '12px 24px',
+              fontSize: '16px',
+              backgroundColor: isRunning ? '#ccc' : '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: isRunning ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {isRunning ? '🔄 Running Submissions...' : '🚀 Run Sample Submissions'}
+          </button>
+          
+          <button 
+            onClick={async () => {
+              setIsRunning(true);
+              setLogs([]);
+              addLog('🧪 Testing new S3 URL schema with mock uploads...');
+              
+              try {
+                const testData = generateSampleData(0);
+                
+                // Add mock files
+                const createMockFile = (fileName: string, content: string): File => {
+                  const blob = new Blob([content], { type: 'text/plain' });
+                  return new File([blob], fileName, { type: 'text/plain' });
+                };
+                
+                testData.logoAI = createMockFile('test-logo.ai', 'Mock AI file');
+                testData.logoJPEG = createMockFile('test-logo.jpg', 'Mock JPEG file');
+                testData.brandGuideline = createMockFile('test-brand.pdf', 'Mock PDF file');
+                testData.supportingDocument = createMockFile('test-support.pdf', 'Mock support doc');
+                
+                const result = await ApplicationService.submitApplicationWithMockUploads(testData);
+                
+                if (result.success) {
+                  addLog(`✅ Test submission successful! ID: ${result.applicationId}`);
+                  addLog('📁 Checking application data for S3 URLs...');
+                  
+                  // Fetch the application to see the S3 URLs
+                  const app = await ApplicationService.getApplication(result.applicationId!);
+                  if (app?.applicationData?.fileUploads) {
+                    const appData = app.applicationData;
+                    addLog('\n📊 S3 URL Information:');
+                    
+                    Object.entries(appData.fileUploads).forEach(([fileType, fileInfo]) => {
+                      if (fileInfo && typeof fileInfo === 'object' && 'fileName' in fileInfo) {
+                        addLog(`\n${fileType}:`);
+                        addLog(`  📎 File: ${fileInfo.fileName} (${fileInfo.fileSize} bytes)`);
+                        addLog(`  🔑 S3 Key: ${fileInfo.s3Key}`);
+                        addLog(`  🌐 S3 URL: ${fileInfo.s3Url}`);
+                        addLog(`  ⏰ Uploaded: ${fileInfo.uploadedAt}`);
+                      }
+                    });
+                    
+                    addLog(`\n📈 Upload Summary:`);
+                    addLog(`  Total Files: ${appData.submissionMetadata?.totalFilesAttempted || 0}`);
+                    addLog(`  Successful: ${appData.submissionMetadata?.totalFilesUploaded || 0}`);
+                  }
+                } else {
+                  addLog(`❌ Test submission failed: ${result.error}`);
+                }
+              } catch (error) {
+                addLog(`💥 Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+              } finally {
+                setIsRunning(false);
+              }
+            }}
+            disabled={isRunning}
+            style={{
+              padding: '12px 24px',
+              fontSize: '16px',
+              backgroundColor: isRunning ? '#ccc' : '#28a745',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: isRunning ? 'not-allowed' : 'pointer'
+            }}
+          >
+            🧪 Test S3 URL Schema
+          </button>
+          
+          <button 
+            onClick={async () => {
+              setIsRunning(true);
+              setLogs([]);
+              addLog('🔥 Testing REAL S3 uploads (files will actually be uploaded to bucket)...');
+              
+              try {
+                const testData = generateSampleData(0);
+                
+                // Add mock files
+                const createMockFile = (fileName: string, content: string): File => {
+                  const blob = new Blob([content], { type: 'text/plain' });
+                  return new File([blob], fileName, { type: 'text/plain' });
+                };
+                
+                testData.logoAI = createMockFile('REAL-test-logo.ai', 'This is a REAL file upload test for AI logo');
+                testData.logoJPEG = createMockFile('REAL-test-logo.jpg', 'This is a REAL file upload test for JPEG logo');
+                testData.brandGuideline = createMockFile('REAL-test-brand.pdf', 'This is a REAL file upload test for brand guideline PDF');
+                testData.supportingDocument = createMockFile('REAL-test-support.pdf', 'This is a REAL file upload test for supporting document');
+                
+                addLog('🚀 Attempting real S3 uploads...');
+                const result = await ApplicationService.submitApplicationWithRealUploads(testData);
+                
+                if (result.success) {
+                  addLog(`✅ REAL upload test successful! ID: ${result.applicationId}`);
+                  addLog('📁 Files should now be visible in your S3 bucket!');
+                  
+                  // Fetch the application to see the real S3 URLs
+                  const app = await ApplicationService.getApplication(result.applicationId!);
+                  if (app?.applicationData?.fileUploads) {
+                    const appData = app.applicationData;
+                    addLog('\n🎯 REAL S3 Upload Results:');
+                    
+                    Object.entries(appData.fileUploads).forEach(([fileType, fileInfo]) => {
+                      if (fileInfo && typeof fileInfo === 'object' && 'fileName' in fileInfo) {
+                        addLog(`\n${fileType}:`);
+                        addLog(`  📎 File: ${fileInfo.fileName}`);
+                        addLog(`  🌐 S3 URL: ${fileInfo.s3Url}`);
+                        addLog(`  ✅ Status: ACTUALLY UPLOADED TO S3!`);
+                      }
+                    });
+                    
+                    addLog(`\n🎊 SUCCESS! Check your S3 bucket for these files:`);
+                    addLog(`   Bucket: amplify-amplifyvitereactt-whexpoapplicationstorage-msgwobtz08zz`);
+                    addLog(`   Region: ap-east-1`);
+                  }
+                } else {
+                  addLog(`❌ Real upload test failed: ${result.error}`);
+                  addLog('💡 This is likely due to expired AWS credentials or permissions issues');
+                }
+              } catch (error) {
+                addLog(`💥 Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                addLog('💡 Common causes: expired AWS credentials, insufficient permissions, or network issues');
+              } finally {
+                setIsRunning(false);
+              }
+            }}
+            disabled={isRunning}
+            style={{
+              padding: '12px 24px',
+              fontSize: '16px',
+              backgroundColor: isRunning ? '#ccc' : '#dc3545',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: isRunning ? 'not-allowed' : 'pointer'
+            }}
+          >
+            🔥 Test REAL S3 Uploads
+          </button>
+        </div>
       </div>
 
       {results.length > 0 && (
