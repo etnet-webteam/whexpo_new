@@ -1,28 +1,27 @@
-import { createBrowserRouter } from 'react-router-dom';
-import App from './App';
-import Home from './pages/Home';
-import BackendHome from './backend/home';
-import BackendLayout from './backend/BackendLayout';
-import Form2025 from './pages/2025/Form';
-import Home2025 from './pages/2025/Home';
-import Winner2025 from './pages/2025/Winner';
-import Judges2025 from './pages/2025/Judges';
-import Highlights2025 from './pages/2025/Highlights';
-import Column2025 from './pages/2025/Column';
-import Events2025 from './pages/2025/Events';
-import SampleSubmissions from './pages/test/SampleSubmissions';
+import { createBrowserRouter } from "react-router-dom";
+import App from "./App";
+import BackendHome from "./backend/home";
+import BackendLayout from "./backend/BackendLayout";
+import Form2025 from "./pages/2025/Form";
+import Home2025 from "./pages/2025/Home";
+import Winner2025 from "./pages/2025/Winner";
+import Judges2025 from "./pages/2025/Judges";
+import Highlights2025 from "./pages/2025/Highlights";
+import Column2025 from "./pages/2025/Column";
+import Events2025 from "./pages/2025/Events";
+import SampleSubmissions from "./pages/test/SampleSubmissions";
 
 export const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <App />,
     children: [
       {
         index: true,
-        element: <Home />,
+        element: <Home2025 />,
       },
       {
-        path: 'backend/*',
+        path: "backend/*",
         element: <BackendLayout />,
         children: [
           {
@@ -33,43 +32,43 @@ export const router = createBrowserRouter([
       },
       // Standalone form route (isolated from other 2025 pages)
       {
-        path: '2025/form',
+        path: "2025/form",
         element: <Form2025 />,
       },
       // Test route for sample submissions
       {
-        path: 'test/samples',
+        path: "test/samples",
         element: <SampleSubmissions />,
       },
       {
-        path: '2025',
+        path: "2025",
         children: [
           {
             index: true,
             element: <Home2025 />,
           },
           {
-            path: 'winner',
+            path: "winner",
             element: <Winner2025 />,
           },
           {
-            path: 'judges',
+            path: "judges",
             element: <Judges2025 />,
           },
           {
-            path: 'highlights',
+            path: "highlights",
             element: <Highlights2025 />,
           },
           {
-            path: 'column',
+            path: "column",
             element: <Column2025 />,
           },
           {
-            path: 'events',
+            path: "events",
             element: <Events2025 />,
           },
         ],
       },
     ],
   },
-]); 
+]);
